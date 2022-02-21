@@ -11,3 +11,10 @@ if (isset($_POST['loginTrigger']) == 1) {
     $callback = new LoginCoreController();
     $callback->ClientLogin($data);
 }
+
+
+if (isset($_POST['state']) == true) {
+
+    $callback = new Tokenization();
+    $callback->tokenIdentify($_POST['owner']);
+}

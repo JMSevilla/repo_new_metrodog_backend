@@ -62,7 +62,7 @@ interface ITokenization
     public function getOAuthToken($tokenOwner, $tokenOwnerId);
     public function checkTokenIfExist($tokenOwner, $tokenOwnerId, $savedPlatform);
     public function updateExistToken($tokenOwnerId);
-    public function tokenIdentify($tokenOwner, $tokenOwnderId);
+    public function tokenIdentify($tokenOwner);
 }
 
 class Tokenization extends DatabaseMigration implements ITokenization
@@ -94,15 +94,17 @@ class Tokenization extends DatabaseMigration implements ITokenization
                 if ($this->php_exec()) {
                     if ($this->php_row_checker()) {
                         $get = $this->php_fetchRow();
-                       
+
                         $cookieReactor->cookieSetter(
                             $get['token'],
-                            time() + 60*60*24*7,
+                            time() + 60 * 60 * 24 * 7,
                             '/',
-                            true, true, 'None', 'adminToken'
+                            true,
+                            true,
+                            'None',
+                            'adminToken'
                         );
-                    }
-                    else{
+                    } else {
                         echo $this->php_responses(
                             true,
                             "single",
@@ -113,42 +115,50 @@ class Tokenization extends DatabaseMigration implements ITokenization
             }
         }
     }
-    public function tokenIdentify($tokenOwner, $tokenOwnderId){
-        $serverHelper = new Server();
-        $queryIndicator = new Queries();
-        if($serverHelper->POSTCHECKER()){
-            if($this->php_prepare($queryIndicator->checkIsTokenValid("check/istokenvalid"))){
-                $this->php_bind(":owner", $tokenOwner);
-                $this->php_bind(":id", $tokenOwnderId);
-                if($this->php_exec()){
-                    if($this->php_row_checker()){
-                        $fetch = $this->php_fetchRow();
-                        if($fetch['istokenvalid'] === '1'){
-                            if($fetch['tokenSavedPlatform'] === 'admin'){
+    public function tokenIdentify($tokenOwner)
+    {
+        if ($tokenOwner == 'unknown') {
+            echo $this->php_responses(
+                true,
+                "single",
+                (object)[0 => array("key" => "invalid_token")]
+            );
+        } else {
+            $serverHelper = new Server();
+            $queryIndicator = new Queries();
+            if ($serverHelper->POSTCHECKER()) {
+                if ($this->php_prepare($queryIndicator->checkIsToken("check/istoken"))) {
+                    $this->php_bind(":owner", $tokenOwner);
+                    if ($this->php_exec()) {
+                        if ($this->php_row_checker()) {
+                            $fetch = $this->php_fetchRow();
+                            if ($fetch['istokenvalid'] === '1') {
+                                if ($fetch['tokenSavedPlatform'] === 'admin') {
+                                    echo $this->php_responses(
+                                        true,
+                                        "single",
+                                        (object)[0 => array("key" => "token_exist_admin")]
+                                    );
+                                } else if ($fetch['tokenSavedPlatform'] === 'admin_selection') {
+                                    echo $this->php_responses(
+                                        true,
+                                        "single",
+                                        (object)[0 => array("key" => "token_exist_admin_selection")]
+                                    );
+                                } else {
+                                    echo $this->php_responses(
+                                        true,
+                                        "single",
+                                        (object)[0 => array("key" => "home_token")]
+                                    );
+                                }
+                            } else {
                                 echo $this->php_responses(
                                     true,
                                     "single",
-                                    (object)[0 => array("key" => "token_exist_admin")]
-                                );
-                            } else if($fetch['tokenSavedPlatform'] === 'admin_selection'){
-                                echo $this->php_responses(
-                                    true,
-                                    "single",
-                                    (object)[0 => array("key" => "token_exist_admin_selection")]
-                                );
-                            }else {
-                                echo $this->php_responses(
-                                    true,
-                                    "single",
-                                    (object)[0 => array("key" => "home_token")]
+                                    (object)[0 => array("key" => "invalid_token")]
                                 );
                             }
-                        }else{
-                            echo $this->php_responses(
-                                true,
-                                "single",
-                                (object)[0 => array("key" => "invalid_token")]
-                            );
                         }
                     }
                 }
@@ -215,7 +225,7 @@ class LoginCoreController extends DatabaseMigration implements LoginCoreInterfac
                         if (password_verify($_POST['password'], $origpass)) {
                             if ($isStatus === "1") {
                                 if ($istype === "1") {
-                                   
+
                                     //admin
                                     /* Token Setter */
                                     $tokenClassify = new Tokenization();

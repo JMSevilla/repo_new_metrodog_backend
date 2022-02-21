@@ -20,6 +20,7 @@ interface QueryIndicator
     public function updateSavedPlatform($args);
     public function updateOnLogout($args);
     public function updateAdminChangePlatform($args);
+    public function checkIsToken($args);
 }
 interface ServerInterface
 {
@@ -28,7 +29,7 @@ interface ServerInterface
 
 class Queries implements QueryIndicator
 {
-    
+
     public function checkUser($args)
     {
         if ($args === "checkUser") {
@@ -110,6 +111,13 @@ class Queries implements QueryIndicator
     {
         if ($args === "check/istokenvalid") {
             $sql = "select * from tokenization where tokenOwner=:owner and tokenOwnerId=:id";
+            return $sql;
+        }
+    }
+    public function checkIsToken($args)
+    {
+        if ($args === "check/istoken") {
+            $sql = "select * from tokenization where tokenOwner=:owner and istokenvalid='1'";
             return $sql;
         }
     }
