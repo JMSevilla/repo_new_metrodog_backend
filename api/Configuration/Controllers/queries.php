@@ -28,6 +28,7 @@ interface ServerInterface
 
 class Queries implements QueryIndicator
 {
+    
     public function checkUser($args)
     {
         if ($args === "checkUser") {
@@ -73,7 +74,7 @@ class Queries implements QueryIndicator
     public function getTokenization($args)
     {
         if ($args === "login/get/token") {
-            $sql = "select * from tokenization where tokenOwner=:ownerName and tokenOwnerId=:uId";
+            $sql = "select * from tokenization where tokenOwner=:ownerName";
             return $sql;
         }
     }
