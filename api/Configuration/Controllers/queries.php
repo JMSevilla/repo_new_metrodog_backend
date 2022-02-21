@@ -147,7 +147,7 @@ class Queries implements QueryIndicator
     public function updateOnLogout($args)
     {
         if ($args === "logout") {
-            $sql = "update tokenization set istokenvalid='0' where tokenOwner=:owner";
+            $sql = "update tokenization set istokenvalid='0', tokenSavedPlatform=:platform where tokenOwner=:owner";
             return $sql;
         }
     }
