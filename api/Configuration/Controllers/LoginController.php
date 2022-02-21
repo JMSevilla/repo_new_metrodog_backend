@@ -8,7 +8,7 @@ interface LoginCoreInterface
     public function ClientLogin($data);
     public function updateOnChangeToAdmin($data);
     // public function updateOnLogoutCore($data);
-    // public function updateOnAdminChangePlatform($data);
+    public function updateOnAdminChangePlatform($data);
 }
 interface LoginControllerInterface
 {
@@ -232,7 +232,7 @@ class LoginCoreController extends DatabaseMigration implements LoginCoreInterfac
                                     $tokenClassify->checkTokenIfExist($data['uname'], $uId, "admin_selection");
                                     // $tokenClassify->checkOAuth($data['uname'], $uId, "admin");
                                     /* Token Getter */
-                                    // $tokenClassify->getOAuthToken($get['username'], $uId);
+                                    $tokenClassify->getOAuthToken($get['username'], $uId);
                                     $logged_array = ["fname" => $fname, "lname" => $lname, "message" => "success_admin", "role" => "administrator"];
                                     echo $this->php_responses(
                                         true,
@@ -294,6 +294,33 @@ class LoginCoreController extends DatabaseMigration implements LoginCoreInterfac
                                     true,
                                     "single",
                                     (object)[0 => array("key" => "update_admin")]
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public function updateOnAdminChangePlatform($data)
+    {
+        $serverHelper = new Server();
+        $queryIndicator = new Queries();
+        if ($serverHelper->POSTCHECKER()) {
+            if ($this->php_prepare($queryIndicator->getTokenOwnerID('get/token/ownerid'))) {
+                $this->php_bind(":owner", $data['owner']);
+                if ($this->php_exec()) {
+                    if ($this->php_row_checker()) {
+                        $get = $this->php_fetchRow();
+                        $Id = $get['tokenOwnerId'];
+                        if ($this->php_prepare($queryIndicator->updatePlatforms('to/dynamic/platform'))) {
+                            $this->php_bind(':platform', 'admin_selection');
+                            $this->php_bind(':id', $Id);
+                            if ($this->php_exec()) {
+                                echo $this->php_responses(
+                                    true,
+                                    "single",
+                                    (object)[0 => array("key" => "update_to_adminselection")]
                                 );
                             }
                         }
