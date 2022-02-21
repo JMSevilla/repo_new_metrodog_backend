@@ -7,7 +7,7 @@ interface LoginCoreInterface
 {
     public function ClientLogin($data);
     public function updateOnChangeToAdmin($data);
-    // public function updateOnLogoutCore($data);
+    public function updateOnLogoutCore($data);
     public function updateOnAdminChangePlatform($data);
 }
 interface LoginControllerInterface
@@ -325,6 +325,24 @@ class LoginCoreController extends DatabaseMigration implements LoginCoreInterfac
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+    public function updateOnLogoutCore($data)
+    {
+        $serverHelper = new Server();
+        $queryIndicator = new Queries();
+        if ($serverHelper->POSTCHECKER()) {
+            if ($this->php_prepare($queryIndicator->updateOnLogout('logout'))) {
+                $this->php_bind(':owner', $data['owner']);
+                $this->php_bind(':platform', 'Home');
+                if ($this->php_exec()) {
+                    echo $this->php_responses(
+                        true,
+                        "single",
+                        (object)[0 => array("key" => "logout_success")]
+                    );
                 }
             }
         }
